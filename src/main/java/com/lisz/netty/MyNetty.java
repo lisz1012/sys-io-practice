@@ -66,7 +66,7 @@ public class MyNetty {
 		NioEventLoopGroup selector = new NioEventLoopGroup(2);
 		selector.execute(() -> {
 			while (true) {
-				System.out.println("Hello world 001");
+				System.out.println("Hello world 001!");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
