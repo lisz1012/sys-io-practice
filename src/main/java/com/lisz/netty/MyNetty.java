@@ -19,7 +19,7 @@ public class MyNetty {
 	@Test
 	public void myBytebuf() {
 //		ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(8, 20);
-		// pool
+		// pool 也可以用堆外内存
 		//ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.heapBuffer(8, 20);
 		ByteBuf buf = PooledByteBufAllocator.DEFAULT.heapBuffer(8, 20);
 		print(buf);
