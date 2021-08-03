@@ -119,7 +119,7 @@ public class MyNetty {
 		// 发送成功才能往下走
 		send.sync();
 
-		// 会阻塞在关闭等待上，以上步骤可能来回多次，是个长连接，服务端退出的时候会往下走
+		// 会阻塞在关闭等待上，以上步骤可能来回多次，是个长连接，服务端退出的时候会往下走。
 		sync.channel().closeFuture().sync();
 
 		System.out.println("client over...");
