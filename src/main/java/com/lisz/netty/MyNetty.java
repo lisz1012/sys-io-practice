@@ -107,7 +107,7 @@ public class MyNetty {
 		ChannelPipeline pipeline = client.pipeline();
 		pipeline.addLast(new MyInHandler());
 
-		// reactor 异步的特征
+		// reactor 异步的特征，在另一个线程里connect，所以要等Future的get
 		ChannelFuture connect = client.connect(new InetSocketAddress("192.168.1.99", 9090));
 
 		// 连上了才往下走
