@@ -110,7 +110,7 @@ public class MyNetty {
 		// reactor 异步的特征，在另一个线程里connect，所以要等Future的get
 		ChannelFuture connect = client.connect(new InetSocketAddress("192.168.1.99", 9090));
 
-		// 连上了才往下走, 等待异步处理的结果
+		// 连上了才往下走, 等待异步处理的结果。
 		ChannelFuture sync = connect.sync();
 
 		ByteBuf buf = Unpooled.copiedBuffer("hello server".getBytes());
