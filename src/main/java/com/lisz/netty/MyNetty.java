@@ -116,7 +116,7 @@ public class MyNetty {
 		ByteBuf buf = Unpooled.copiedBuffer("hello server".getBytes());
 		ChannelFuture send = client.writeAndFlush(buf);
 
-		// 发送成功才能往下走
+		// 发送成功才能往下走，这里又是异步！
 		send.sync();
 
 		// 会阻塞在关闭等待上，以上步骤可能来回多次，是个长连接，服务端退出的时候会往下走。
