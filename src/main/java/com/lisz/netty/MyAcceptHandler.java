@@ -12,7 +12,7 @@ public class MyAcceptHandler extends ChannelInboundHandlerAdapter {
 
 	public MyAcceptHandler(EventLoopGroup selector, ChannelHandler handler) {
 		this.selector = selector;
-		this.handler = handler;
+		this.handler = handler; // ChannelInit
 	}
 
 	@Override
@@ -27,9 +27,9 @@ public class MyAcceptHandler extends ChannelInboundHandlerAdapter {
 		// 在不同的通道上，Read最开始读到的东西不一样
 		//accept 我怎么没调呢？接收完了之后把客户端直接传进来了
 		SocketChannel client = (SocketChannel)msg;
-		// 注册
-		selector.register((client));
 		// 响应式的
-		client.pipeline().addLast(handler);
+		client.pipeline().addLast(handler); // client::pipeline[ChannelInit, ]
+		// 注册
+		selector.register(client);
 	}
 }

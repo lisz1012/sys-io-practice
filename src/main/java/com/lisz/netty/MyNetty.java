@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -134,8 +135,20 @@ public class MyNetty {
 		thread.register(server);
 		// 指不定什么时候家里来人, 响应式，预埋，之后的某个时间执行。
 		// 注册事件，观察者模式。提前写逻辑，被用到的时候才执行。
-		server.pipeline().addLast(new MyAcceptHandler(thread, new MyInHandler())); // accept接收并且注册到selector
-		ChannelFuture serverFuture = server.bind(new InetSocketAddress("localhost", 9090));
+		// accept接收并且注册到selector
+		server.pipeline().addLast(new MyAcceptHandler(thread, new ChannelInit(){
+			@Override
+			protected void initChannel(ChannelHandlerContext ctx) {
+				Channel channel = ctx.channel();
+				channel.pipeline().addLast(new MyInHandler());
+				ctx.pipeline().remove(this);
+				// 3 client::pipeliine[MyInHandler]
+			}
+		}));
+		// 下面有坑：hostname写localhost的话，别的机器作为client nc连不上来
+		ChannelFuture serverFuture = server.bind(new InetSocketAddress("192.168.1.102", 9090));
 		serverFuture.sync().channel().closeFuture().sync();
+
+		System.out.println("Server close ...");
 	}
 }
