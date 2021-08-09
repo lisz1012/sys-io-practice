@@ -1,12 +1,12 @@
 package com.lisz.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.*;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.ServerSocketChannel;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.Test;
@@ -128,6 +128,30 @@ public class MyNetty {
 
 
 
+	// Server： nc -l 192.168.1.99 9090
+	@Test
+	public void nettyClient() throws Exception {
+		NioEventLoopGroup group = new NioEventLoopGroup(1);
+		Bootstrap bootstrap = new Bootstrap();
+		ChannelFuture connect = bootstrap.group(group)
+				.channel(NioSocketChannel.class)
+				.handler(new ChannelInitializer<SocketChannel>() { // Channel（默认）也可以
+					@Override
+					protected void initChannel(SocketChannel ch) throws Exception {
+						ch.pipeline().addLast(new MyInHandler());
+					}
+				}).connect(new InetSocketAddress("192.168.1.99", 9090));
+		Channel client = connect.sync().channel();
+
+		ByteBuf buf = Unpooled.copiedBuffer("Hello server.".getBytes());
+		ChannelFuture send = client.writeAndFlush(buf);
+		send.sync();
+
+		client.closeFuture().sync();
+	}
+
+
+
 	@Test
 	public void serverMode() throws Exception {
 		NioEventLoopGroup thread = new NioEventLoopGroup(1);
@@ -150,5 +174,25 @@ public class MyNetty {
 		serverFuture.sync().channel().closeFuture().sync();
 
 		System.out.println("Server close ...");
+	}
+
+
+
+	// 自己摸索推导出来的，太高兴啦！
+	@Test
+	public void nettyServer() throws Exception {
+		NioEventLoopGroup thread = new NioEventLoopGroup(1);
+		ServerBootstrap serverBootstrap = new ServerBootstrap();
+		ChannelFuture connect = serverBootstrap
+				.group(thread, thread) // 一个是boss一个是worker，可复用同一个，所以调用一个参数的也可以
+				.channel(NioServerSocketChannel.class)
+				.childHandler(new ChannelInitializer<NioSocketChannel>() {
+					@Override
+					protected void initChannel(NioSocketChannel ch) throws Exception { // SocketChannel也行
+						ch.pipeline().addLast(new MyInHandler());
+					}
+				})
+				.bind("192.168.1.102", 9090);
+		connect.sync().channel().closeFuture().sync();
 	}
 }
