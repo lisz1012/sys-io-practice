@@ -47,7 +47,7 @@ public class MyRPCTest {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				//如何设计我们的consumer对于provider的调用过程
-				//1，调用 服务，方法，参数  ==> 封装成message  [content]
+				//1，调用 服务，方法，参数  ==> 封装成message  [content]  按理说还要有一个注册发现中心，这里先略
 
 				//2，requestID+message  ，本地要缓存
 				//协议：【header<>】【msgBody】
