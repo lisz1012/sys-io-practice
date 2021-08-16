@@ -3,7 +3,7 @@ package com.lisz.netty.rpc;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ResponseHandler {
+public class ResponseMappingCallback {
 	public static Map<Long, Runnable> map = new ConcurrentHashMap<>();
 
 	public static void addCallBack(long requestId, Runnable cb) {
