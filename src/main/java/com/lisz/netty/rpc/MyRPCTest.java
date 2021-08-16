@@ -20,7 +20,6 @@ package com.lisz.netty.rpc;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -28,20 +27,17 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 上节课，基本写了一个能发送
@@ -55,14 +51,17 @@ public class MyRPCTest {
 	@Test
 	public void get() throws Exception {
 		new Thread(()->{startServer();}).start();
-		int size = 80;
+		AtomicInteger num = new AtomicInteger(0);
+		int size = 500;
 		Thread[] threads = new Thread[size];
 		for (int i = 0; i < size; i++) {
 			threads[i] = new Thread(()->{
 //				Fly fly = proxyGet(Fly.class);
 //				fly.xxoo("hello");
 				Car car = proxyGet(Car.class); //动态代理实现
-				car.ooxx("hello");
+				String arg = "hello" + num.incrementAndGet();
+				final String res = car.ooxx(arg);
+				System.out.println("arg: " + arg + " res: " + res);
 			});
 		}
 		for (Thread thread : threads) {
@@ -90,9 +89,9 @@ public class MyRPCTest {
 				String methodName = method.getName();
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				MyContent content = new MyContent();
-				content.name = name;
-				content.methodName = methodName;
-				content.parameterTypes = parameterTypes;
+				content.setName(name);
+				content.setMethodName(methodName);
+				content.setParameterTypes(parameterTypes);
 				content.setArgs(args);
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -117,18 +116,20 @@ public class MyRPCTest {
 				NioSocketChannel clientChannel
 						= factory.getClient(new InetSocketAddress("192.168.1.102", 9090));
 				//4，发送--> 走IO  out -->走Netty（event 驱动）
-				final CountDownLatch latch = new CountDownLatch(1);
-				ResponseHandler.addCallBack(header.getRequestId(), new MyCallBack(latch));
+				//final CountDownLatch latch = new CountDownLatch(1);
+				CompletableFuture<String> res = new CompletableFuture<>();
+				ResponseMappingCallback.addCallBack(header.getRequestId(), res);
 				final ChannelFuture send = clientChannel.writeAndFlush(buf);
 				send.sync();
 
 
 
-				latch.await();
+
+				//latch.await();
 
 				//5，？，如果从IO ，未来回来了，怎么将代码执行到这里
 				//（睡眠/回调，如何让线程停下来？你还能让他继续。。。 Latch）
-				return null;
+				return res.get();
 			}
 		});
 	}
@@ -147,8 +148,8 @@ public class MyRPCTest {
 	//Server端
 	@Test
 	public void startServer() {
-		NioEventLoopGroup boss = new NioEventLoopGroup(1);
-		NioEventLoopGroup workers = new NioEventLoopGroup(1);
+		NioEventLoopGroup boss = new NioEventLoopGroup(50);
+		NioEventLoopGroup workers = boss;//new NioEventLoopGroup(50);
 		ServerBootstrap serverBootstrap = new ServerBootstrap();
 		final ChannelFuture bind = serverBootstrap.group(boss, workers)
 				.channel(NioServerSocketChannel.class)
@@ -156,7 +157,7 @@ public class MyRPCTest {
 					@Override
 					protected void initChannel(NioSocketChannel ch) throws Exception {
 						System.out.println("Server accept client port: " + ch.remoteAddress().getPort());
-						ch.pipeline().addLast(new RequestHandler());
+						ch.pipeline().addLast(new ServerDecoder()).addLast(new RequestHandler());
 					}
 				})
 				.bind("192.168.1.102", 9090);

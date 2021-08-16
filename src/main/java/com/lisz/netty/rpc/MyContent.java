@@ -10,4 +10,5 @@ public class MyContent implements Serializable {
 	String methodName;
 	Class<?>[] parameterTypes;
 	Object[] args;
+	String res;
 }

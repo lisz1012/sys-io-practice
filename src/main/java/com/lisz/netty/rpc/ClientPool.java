@@ -18,7 +18,7 @@ public class ClientPool {
 	private Random rand = new Random();
 	private int size;
 	private InetSocketAddress address;
-	NioEventLoopGroup clientWorker;
+	private NioEventLoopGroup clientWorker;
 
 	public ClientPool(int size, InetSocketAddress address) {
 		this.size = size;
@@ -40,14 +40,14 @@ public class ClientPool {
 	}
 
 	private NioSocketChannel create(InetSocketAddress address) {
-		clientWorker = new NioEventLoopGroup(1);
+		clientWorker = new NioEventLoopGroup(10);
 		Bootstrap bs = new Bootstrap();
 		final ChannelFuture connect = bs.group(clientWorker)
 				.channel(NioSocketChannel.class)
 				.handler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
-						ch.pipeline().addLast(new ClientResponse()); //解决给谁的
+						ch.pipeline().addLast(new ServerDecoder()).addLast(new ClientResponse()); //解决给谁的
 					}
 				})
 				.connect(address);
