@@ -14,7 +14,7 @@ public class ServerDecoder extends ByteToMessageDecoder {
 	/*
 	父类里一定有channelRead {前面的品buf  decode)_; 剩余留存; 堆out遍历 } -> byteBuf
 	我们用Netty就是偷懒了，自己其实也能实现
-	只处理囫囵的 	PackageMsg，遇到半截的就break返回
+	只处理囫囵的 	PackageMsg，遇到半截的就break返回，父类里有帮着处理的代码
 	 */
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
