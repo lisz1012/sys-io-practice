@@ -31,7 +31,7 @@ public class ServerDecoder extends ByteToMessageDecoder {
 				byte[] data = new byte[(int) header.getDataLength()];
 				buf.readBytes(data);
 				bais = new ByteArrayInputStream(data);
-				ois=  new ObjectInputStream(bais);
+				ois = new ObjectInputStream(bais);
 
 				if (header.getFlag() == 0x14141414) { //  Client -> Server
 					MyContent content = (MyContent) ois.readObject();

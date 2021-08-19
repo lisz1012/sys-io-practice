@@ -48,7 +48,7 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 				myHeader.setFlag(0x14141424);
 				myHeader.setDataLength(contentBytes.length);
 				final byte[] headerBytes = SerDerUtil.serialize(myHeader);
-
+				//下面两行相当于ByteBuf buf = Unpooled.copiedBuffer(msgHeader, msgBody);
 				final ByteBuf byteBuf = PooledByteBufAllocator
 						.DEFAULT.directBuffer(headerBytes.length + contentBytes.length);
 				byteBuf.writeBytes(headerBytes).writeBytes(contentBytes);
