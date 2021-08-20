@@ -20,7 +20,7 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 
 		// 假设业务层已经处理完了，要给客户端返回了
 		// 需要注意哪些环节？
-		// ByteBuf、因为是RPC，得有一个requestID
+		// ByteBuf、因为是RPC，得有一个requestID，找回CompletableFuture的内容应该返回给谁
 		// 在client那边也要解决解码的问题
 		// 关注RPC通信协议。来的时候flag是0x14141414，
 		// 有新的header + content
