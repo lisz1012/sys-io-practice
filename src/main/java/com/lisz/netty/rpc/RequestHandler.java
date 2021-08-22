@@ -30,7 +30,7 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 		// 3. 自己创建线程池
 		// 4. 当前线程只处理IO，后续业务以ctx.executor().parent().next().execute的方式让所有线程来分担：IO和业务解耦
 		// boss和workers会共享这些线程
-		// ctx.executor().execute(new Runnable() { // executor是eventLoop， IO Thread == Exec Thread，上面第一种
+		// ctx.executor().execute(new Runnable() { // executor是eventLoop， IO Thread == Exec Thread，上面第一种.
 		//ctx.executor().parent().submit(new Thread() { // executor().parent()是eventLoopGroup， IO Thread != Exec Thread
 		ctx.executor().parent().next().execute(new Thread() { // 上一行和这一行的写法似乎效果一样
 			@Override
