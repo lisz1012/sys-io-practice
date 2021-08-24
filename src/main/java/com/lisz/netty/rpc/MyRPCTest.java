@@ -169,7 +169,20 @@ public class MyRPCTest {
 				.bind("192.168.1.102", 9090); // 下面还可以继续bing多个端口，但不同端口过来的都会走同一套逻辑👆
 		// 当用一个ServerBootStrap，bind一个端口号的时候，boss中有一个EventLoop在listen，accept交给了这个监听线程，
 		// 客户端连过来之后，会有一个client socket，它作为结果，会去worker EventLoop的selector上去注册，后者负责数据
-		// 的发送和请求的响应。这个过程会把Handler注入到pipeline
+		// 的发送和请求的响应。这个过程会把Handler注入到pipeline。
+		// 如果bind多个端口，则有多个boss中的EventLoop被激活，listen然后accept。
+		// 不同的客户端访问不同的端口号的时候，虽然我说我在了不同的listen的线程上，但是两个端口用的是逻辑是一套Handler逻辑
+		// 只不过是丰富地暴露了多个端口号而已。多个端口号映射服务是可以做的，相同的Handler处理
+		// 当用两个ServerBootStrap来bind各自的端口号，线程组是一样的，但是每个ServerBootStrap可以配置自己的一套Handlers
+		// IO密集型和Kernel打交道；计算密集型消耗CPU时间。
+		// 如果CPU被占用的很多，单机解决不了这个问题。跟内核关系不大。上下文切换，开太多线程没有意思
+		// IO密集型，好像计算很快，有用户态和内核态切换的问题，因为现在基于内核，我们一般用的都是同步IO模型：程序自己调用read读取到达内核
+		// 的数据，而不是内核自动把数据放到用户空间的特定位置。
+		// 同一个线程既读取网络IO来的数据，又拿着这个数据进行计算，则就成了Redis的模型；也可以IO和计算有各自的线程，
+		// 然后计算线程的CPU只管计算，不怎么被调度了；IO线程也不管计算，这样的IO模型，更顺滑一些
+		// 当IO密集型发生的时候，底层会有一个优化：由底层硬件和内核实现的。网卡接收数据会有中断，触发CPU搬运数据。
+		// 但是当网卡到来的数据极快，OS操心了，就把中断关了，协处理器。数据包其实先要进入内核的queue，来得太快，会达到队列大小的上限
+		// 程序到底应该以什么频率、速度去搬运内核queue里的数据？阿里、美团都遇到过这个坑。
 		try {
 			bind.sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
