@@ -10,8 +10,15 @@ import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class RequestHandler extends ChannelInboundHandlerAdapter {
+	private Dispatcher dispatcher;
+	public RequestHandler(Dispatcher dispatcher) {
+		this.dispatcher = dispatcher;
+	}
+
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		PackageMsg requestPackageMsg = (PackageMsg) msg;
@@ -35,12 +42,25 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 		ctx.executor().parent().next().execute(new Thread() { // 上一行和这一行的写法似乎效果一样
 			@Override
 			public void run() {
-				final String execThreadName = Thread.currentThread().getName();
+				final String className = requestPackageMsg.getContent().getName();
+				final String methodName = requestPackageMsg.getContent().getMethodName();
+				final Class<?>[] parameterTypes = requestPackageMsg.getContent().getParameterTypes();
+				final Object[] args = requestPackageMsg.getContent().getArgs();
+				final Object o = dispatcher.get(className);
+				Object retVal = null;
+				try {
+					final Method method = o.getClass().getMethod(methodName, parameterTypes);
+					retVal = method.invoke(o, args);
+				} catch (InvocationTargetException | IllegalAccessException| NoSuchMethodException e) {
+					e.printStackTrace();
+				}
+
+
+//				final String execThreadName = Thread.currentThread().getName();
 				MyContent content = new MyContent();
-				final String s = "IO thread: " + ioThreadName + " Exec thread: " + execThreadName
-						+ " From args: " + requestPackageMsg.getContent().getArgs()[0];
-				System.out.println(s);
-				content.setRes(s);
+//				final String s = "IO thread: " + ioThreadName + " Exec thread: " + execThreadName
+//						+ " From args: " + requestPackageMsg.getContent().getArgs()[0];
+				content.setRes((String) retVal);
 				final byte[] contentBytes  = SerDerUtil.serialize(content);
 
 				MyHeader myHeader = new MyHeader();

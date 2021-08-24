@@ -148,6 +148,12 @@ public class MyRPCTest {
 	//Server端
 	@Test
 	public void startServer() {
+		Car car = new MyCar();
+		MyFly fly = new MyFly();
+		Dispatcher dispatcher = new Dispatcher();
+		dispatcher.register(Car.class.getName(), car);
+		dispatcher.register(Fly.class.getName(), fly);
+
 		NioEventLoopGroup boss = new NioEventLoopGroup(50);
 		NioEventLoopGroup workers = boss;//new NioEventLoopGroup(50);
 		ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -157,10 +163,13 @@ public class MyRPCTest {
 					@Override
 					protected void initChannel(NioSocketChannel ch) throws Exception {
 						System.out.println("Server accept client port: " + ch.remoteAddress().getPort());
-						ch.pipeline().addLast(new ServerDecoder()).addLast(new RequestHandler());
+						ch.pipeline().addLast(new ServerDecoder()).addLast(new RequestHandler(dispatcher));
 					}
 				})
-				.bind("192.168.1.102", 9090);
+				.bind("192.168.1.102", 9090); // 下面还可以继续bing多个端口，但不同端口过来的都会走同一套逻辑👆
+		// 当用一个ServerBootStrap，bind一个端口号的时候，boss中有一个EventLoop在listen，accept交给了这个监听线程，
+		// 客户端连过来之后，会有一个client socket，它作为结果，会去worker EventLoop的selector上去注册，后者负责数据
+		// 的发送和请求的响应。这个过程会把Handler注入到pipeline
 		try {
 			bind.sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
