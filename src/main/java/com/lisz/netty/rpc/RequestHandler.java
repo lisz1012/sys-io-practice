@@ -42,6 +42,8 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 		ctx.executor().parent().next().execute(new Thread() { // 上一行和这一行的写法似乎效果一样
 			@Override
 			public void run() {
+				// 反射。Spark里面具备固定角色，单例对象msg，判定。还有一种方法：javaassist动态代理的方式生成调用类。反射最慢
+				// 剩下两种看情况，看用户的实现和接口确不确定（一撅腚就知道放什么屁 VS 一撅腚不知道放什么屁）
 				final String className = requestPackageMsg.getContent().getName();
 				final String methodName = requestPackageMsg.getContent().getMethodName();
 				final Class<?>[] parameterTypes = requestPackageMsg.getContent().getParameterTypes();
