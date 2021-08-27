@@ -86,7 +86,7 @@ public class MyRPCTest {
 	public void startServer() {
 		Car car = new MyCar();
 		MyFly fly = new MyFly();
-		Dispatcher dispatcher = new Dispatcher();
+		Dispatcher dispatcher = Dispatcher.getInstance();
 		dispatcher.register(Car.class.getName(), car);
 		dispatcher.register(Fly.class.getName(), fly);
 
