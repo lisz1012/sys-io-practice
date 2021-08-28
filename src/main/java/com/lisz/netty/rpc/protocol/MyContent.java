@@ -1,4 +1,4 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.protocol;
 
 import lombok.Data;
 
@@ -10,5 +10,5 @@ public class MyContent implements Serializable {
 	String methodName;
 	Class<?>[] parameterTypes;
 	Object[] args;
-	String res;
+	Object res;
 }

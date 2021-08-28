@@ -1,4 +1,6 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.service;
+
+import com.lisz.netty.rpc.service.Fly;
 
 public class MyFly implements Fly {
 	@Override

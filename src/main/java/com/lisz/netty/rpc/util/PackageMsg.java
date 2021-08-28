@@ -1,5 +1,7 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.util;
 
+import com.lisz.netty.rpc.protocol.MyContent;
+import com.lisz.netty.rpc.protocol.MyHeader;
 import lombok.Data;
 
 @Data

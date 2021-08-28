@@ -1,4 +1,4 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.transport;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -30,12 +30,16 @@ public class ClientPool {
 		}
 	}
 
-	public synchronized NioSocketChannel getNioSocketChannel() {
+	public NioSocketChannel getNioSocketChannel() {
 		final int i = rand.nextInt(size);
 		if (clients[i] != null && clients[i].isActive()) {
 			return clients[i];
 		}
-		clients[i] = create(address);
+		synchronized (clients) {
+			if (clients[i] == null || !clients[i].isActive()) {
+				clients[i] = create(address);
+			}
+		}
 		return clients[i];
 	}
 

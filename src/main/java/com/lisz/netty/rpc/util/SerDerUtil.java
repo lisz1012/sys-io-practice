@@ -1,4 +1,4 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.util;
 
 import java.io.*;
 

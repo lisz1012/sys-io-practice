@@ -1,14 +1,15 @@
 package com.lisz.netty.rpc;
 
+import com.lisz.netty.rpc.util.PackageMsg;
+
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResponseMappingCallback {
-	public static Map<Long, CompletableFuture<String>> map = new ConcurrentHashMap<>();
+	public static Map<Long, CompletableFuture<Object>> map = new ConcurrentHashMap<>();
 
-	public static void addCallBack(long requestId, CompletableFuture<String> completableFuture) {
+	public static void addCallBack(long requestId, CompletableFuture<Object> completableFuture) {
 		map.put(requestId, completableFuture);
 	}
 

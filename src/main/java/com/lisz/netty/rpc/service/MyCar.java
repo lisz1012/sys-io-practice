@@ -1,4 +1,6 @@
-package com.lisz.netty.rpc;
+package com.lisz.netty.rpc.service;
+
+import com.lisz.netty.rpc.service.Car;
 
 public class MyCar implements Car {
 	@Override
