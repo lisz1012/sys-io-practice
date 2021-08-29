@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 // 源于Spark源码 Spark RpcEnv
 public class ClientFactory {
-	private int poolSize = 1;
+	private int poolSize = 5;
 	private static final ClientFactory INSTANCE = new ClientFactory();
 	private ClientFactory(){}
 
@@ -33,7 +33,7 @@ public class ClientFactory {
 		if (clientPool == null) {
 			synchronized (outboxes) {
 				if (clientPool == null) {
-					outboxes.put(address, new ClientPool(poolSize, address));
+					outboxes.putIfAbsent(address, new ClientPool(poolSize, address));
 					clientPool = outboxes.get(address);
 				}
 			}

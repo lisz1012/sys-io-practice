@@ -50,7 +50,7 @@ public class MyRPCTest {
 	// 模拟客户端
 	@Test
 	public void get() throws Exception {
-		new Thread(()->{startServer();}).start();
+//		new Thread(()->{startServer();}).start();
 		AtomicInteger num = new AtomicInteger(0);
 		int size = 500;
 		Thread[] threads = new Thread[size];
@@ -126,6 +126,13 @@ public class MyRPCTest {
 		// 第一步从网卡到内核的搬运，由CPU直接干预，还是很快的，所谓"网卡打满"的主要原因就是第二部从kernel到JVM直接内存的搬运不够快，
 		// 美团和淘宝双十一的树上有这个介绍
 		// 一期-203后半节课
+		// 并发可以很大：拦截
+		// 1。reactor模型，os多路复用器并发模型：epoll
+		// 2。EventLoopGroup中每个EventLoop是一个reactor（selector，多路复用器，其上面可以注册很多连接），占用一个CPU
+		// 3。IO的读取（从内核到app搬运）是线性的
+		// 4。读取到的内容可以在当前线程（读取和计算在一起，阻塞后续IO的读取），也可以在其他线程
+		// 5。考量：IO上的损耗，尤其在读取时间和资源占比上
+		// 6。尽量发小包（好的压缩：1。协议上减轻，用二进制位 2。好的压缩算法（消耗CPU，但是CPU一定比IO快）。）
 		try {
 			bind.sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
