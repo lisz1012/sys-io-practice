@@ -17,18 +17,29 @@ package com.lisz.netty.rpc;
  */
 
 
+import com.lisz.netty.rpc.protocol.MyContent;
 import com.lisz.netty.rpc.proxy.MyProxy;
 import com.lisz.netty.rpc.service.*;
 import com.lisz.netty.rpc.transport.RequestHandler;
 import com.lisz.netty.rpc.transport.ServerDecoder;
+import com.lisz.netty.rpc.util.SerDerUtil;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.*;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.lisz.netty.rpc.proxy.MyProxy.proxyGet;
@@ -57,9 +68,10 @@ public class MyRPCTest {
 //				Fly fly = proxyGet(Fly.class);
 //				fly.xxoo("hello");
 				Car car = proxyGet(Car.class); //动态代理实现
-				String arg = "hello" + num.incrementAndGet();
-				final String res = car.ooxx(arg);
-				System.out.println("arg: " + arg + " res: " + res);
+//				String arg = "hello" + num.incrementAndGet();
+//				final String res = car.ooxx(arg);
+//				System.out.println("arg: " + arg + " res: " + res);
+				System.out.println(car.getPerson("Zhang san", 20));
 			});
 		}
 		for (Thread thread : threads) {
@@ -91,7 +103,57 @@ public class MyRPCTest {
 					@Override
 					protected void initChannel(NioSocketChannel ch) throws Exception {
 						System.out.println("Server accept client port: " + ch.remoteAddress().getPort());
-						ch.pipeline().addLast(new ServerDecoder()).addLast(new RequestHandler(dispatcher));
+						// 未来有两种可能
+						// 1。自定义的RPC
+						//ch.pipeline().addLast(new ServerDecoder()).addLast(new RequestHandler(dispatcher));
+						// 在自己定义协议的时候，关注过粘包拆包的问题，header + content，header稳定，能给出content的长度
+						// 2。小火车，传输协议用的就是http了 <- 可以自己学，通过网络传输的都是字节数组，netty提供一套解码的handler
+						ch.pipeline().addLast(new HttpServerCodec())
+								.addLast(new HttpObjectAggregator(1024 * 512))
+						.addLast(new ChannelInboundHandlerAdapter() {
+							/*
+							netty 自己提供了一套对于http协议的支持框架
+							接收：FullHttpRequest request = (FullHttpRequest) msg
+							request -> ByteBuf -> byte[] -> MyContent
+							处理，将结果放进一个新的 MyContent并将其写回客户端
+							MyContent -> byte[] -> ByteBuf -> response
+							发送：ctx.writeAndFlush(response);
+							 */
+							@Override
+							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+								// http协议，这个msg应该是一个完整的Request，前面的Handler已经帮我们Aggregate好了
+								// 可以看HttpObjectAggregator的注释
+								//MyContent content = (MyContent) msg;
+								FullHttpRequest request = (FullHttpRequest) msg; // 自己想出来的，哈哈哈
+								System.out.println(request.toString());//因为现在Consumer使用的是一个现成的URL
+								ByteBuf buf = request.content().copy(); // Consumer序列化的MyContent
+								byte[] bytes = new byte[buf.readableBytes()];
+								buf.readBytes(bytes);
+								MyContent content = SerDerUtil.deserialize(bytes, MyContent.class);
+
+								String name = content.getName();
+								String methodName = content.getMethodName();
+								Class<?>[] parameterTypes = content.getParameterTypes();
+								Object[] args = content.getArgs();
+								Object o = dispatcher.get(name);
+								Method method = o.getClass().getMethod(methodName, parameterTypes);
+								final Object retVal = method.invoke(o, args);
+								MyContent resContent = new MyContent();
+								resContent.setRes(retVal);
+
+								bytes = SerDerUtil.serialize(resContent);
+								buf = PooledByteBufAllocator.DEFAULT.directBuffer(bytes.length);
+								buf.writeBytes(bytes);
+								DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+										request.protocolVersion(), HttpResponseStatus.OK, buf);
+
+								// http协议，header + content。跟上面的FullHttpRequest request = (FullHttpRequest) msg呼应
+								ctx.writeAndFlush(response);
+
+								final List<Map.Entry<String, String>> entries = request.headers().entries();
+								System.out.println(entries);
+							}
+						});
 					}
 				})
 				.bind("192.168.1.102", 9090); // 下面还可以继续bing多个端口，但不同端口过来的都会走同一套逻辑👆
