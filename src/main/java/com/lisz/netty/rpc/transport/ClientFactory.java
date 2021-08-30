@@ -34,7 +34,7 @@ public class ClientFactory {
 		ClientPool clientPool = outboxes.get(address);
 		if (clientPool == null) {
 			synchronized (outboxes) {
-				if (clientPool == null) {
+				if (outboxes.get(address) == null) {
 					outboxes.putIfAbsent(address, new ClientPool(poolSize, address));
 					clientPool = outboxes.get(address);
 				}
