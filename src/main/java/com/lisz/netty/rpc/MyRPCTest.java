@@ -17,10 +17,8 @@ package com.lisz.netty.rpc;
  */
 
 
-import com.lisz.netty.rpc.service.Car;
-import com.lisz.netty.rpc.service.Fly;
-import com.lisz.netty.rpc.service.MyCar;
-import com.lisz.netty.rpc.service.MyFly;
+import com.lisz.netty.rpc.proxy.MyProxy;
+import com.lisz.netty.rpc.service.*;
 import com.lisz.netty.rpc.transport.RequestHandler;
 import com.lisz.netty.rpc.transport.ServerDecoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -79,7 +77,7 @@ public class MyRPCTest {
 	@Test
 	public void startServer() {
 		Car car = new MyCar();
-		MyFly fly = new MyFly();
+		Fly fly = new MyFly();
 		Dispatcher dispatcher = Dispatcher.getInstance();
 		dispatcher.register(Car.class.getName(), car);
 		dispatcher.register(Fly.class.getName(), fly);
@@ -133,10 +131,24 @@ public class MyRPCTest {
 		// 4。读取到的内容可以在当前线程（读取和计算在一起，阻塞后续IO的读取），也可以在其他线程
 		// 5。考量：IO上的损耗，尤其在读取时间和资源占比上
 		// 6。尽量发小包（好的压缩：1。协议上减轻，用二进制位 2。好的压缩算法（消耗CPU，但是CPU一定比IO快）。）
+		// 无状态：在连接吃梨取连接，并锁定连接，发送和返回的生命周期里锁定
+		// 有状态：consumer + Provider端同步实现有状态协议（requestId）。发送和接收可以同步，连接可以共享使用
+		// http可以吗？本身是无状态的 C + P。Provider能够解析requestId，处理完了之后还能把它封装回Response中，C端再识别requestId
+		// http 的 keepalive可以避免三次握手，一次发送一次返回，再一次发送再一次返回，但是连接不断
+		// C + P 端遵从http协议约束，豹纹的封装，是否断开连接，保证发送 + 返回为一个"原子操作"，在http协议之上带上requestId
+		// 去掉名字，大家走的都是TCP。内功心法就是TCP连接。但是有可能Provider端不可控，那Consumer可能只能实用http协议
+		// http连接可以穿行使用，也有池化的概念
 		try {
 			bind.sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testRPC() {
+		Car car = MyProxy.proxyGet(Car.class);
+		final Person person = car.getPerson("Zhang san", 12);
+		System.out.println(person);
 	}
 }

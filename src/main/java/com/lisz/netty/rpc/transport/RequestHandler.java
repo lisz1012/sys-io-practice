@@ -62,7 +62,7 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 				MyContent content = new MyContent();
 //				final String s = "IO thread: " + ioThreadName + " Exec thread: " + execThreadName
 //						+ " From args: " + requestPackageMsg.getContent().getArgs()[0];
-				content.setRes((String) retVal);
+				content.setRes(retVal);
 				final byte[] contentBytes  = SerDerUtil.serialize(content);
 
 				MyHeader myHeader = new MyHeader();

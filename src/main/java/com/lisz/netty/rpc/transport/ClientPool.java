@@ -51,7 +51,7 @@ public class ClientPool {
 				.handler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
-						ch.pipeline().addLast(new ServerDecoder()).addLast(new ClientResponse()); //解决给谁的
+						ch.pipeline().addLast(new ServerDecoder()).addLast(new ClientResponse()); //解决响应回来给谁
 					}
 				})
 				.connect(address);
