@@ -30,7 +30,7 @@ public class ClientFactory {
 	private Map<InetSocketAddress, ClientPool> outboxes = new ConcurrentHashMap<>();
 
 	public NioSocketChannel getClient(InetSocketAddress address) {
-		// TODO 在并发情况下一定要谨慎
+		// TODO 在并发情况下一定要谨慎！
 		ClientPool clientPool = outboxes.get(address);
 		if (clientPool == null) {
 			synchronized (outboxes) {
