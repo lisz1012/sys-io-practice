@@ -44,7 +44,7 @@ public class ClientFactory {
 	}
 
 	public static CompletableFuture<Object> transport(MyContent content) throws Throwable {
-		// content就是货物，现在可以用自定义的RPC传输协议，也可以用Http协议作为载体传输
+		// content就是货物，现在可以用自定义的RPC传输协议，也可以用Http协议作为载体传输。
 		// 先手工用了http协议作为载体，那样是不是未来可以让Provider是一个tomcat jetty，基于http协议的一个容器
 		// 有无状态来自于你使用什么协议，http协议是无状态的（自定义的是有状态的），每请求对应一个连接。
 		// Dubbo是一个RPC框架，netty是一个io框架。Dubbo中传输协议上，可以是自定义的RPC传输协议，或者http协议
