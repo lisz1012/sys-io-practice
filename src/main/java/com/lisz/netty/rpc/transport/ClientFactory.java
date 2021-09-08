@@ -5,10 +5,14 @@ import com.lisz.netty.rpc.service.Person;
 import com.lisz.netty.rpc.util.SerDerUtil;
 import com.lisz.netty.rpc.protocol.MyContent;
 import com.lisz.netty.rpc.protocol.MyHeader;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 
 import java.io.*;
 import java.net.*;
@@ -89,7 +93,7 @@ public class ClientFactory {
 			// 1。用URL现成的 okhttp、URLConnection等工具，它们包含了http编解码、发送、socket、连接
 			urlTrans(content, res);
 			// 2。自己操心：on Netty（IO框架） + netty已经提供的http协议相关的编解码
-			//netty(content, res)
+			//nettyTrans(content, res)
 		}
 
 
@@ -119,5 +123,42 @@ public class ClientFactory {
 			e.printStackTrace();
 		}
 		res.complete(obj);
+	}
+
+	private static void nettyTrans(MyContent content, CompletableFuture<Object> res) {
+		// 在这个执行之前，我们的server端 provider已经开发完了，已经是on netty的http server
+		// 现在做的事Consumer端的代码修改，改成on netty的http client
+		// 刚才一切都顺利，关注未来的问题。。。
+		// 每个请求对应一个连接
+		// 1。通过netty建立IO连接 socket/io
+		NioEventLoopGroup group = new NioEventLoopGroup(1); //本该定义到外面
+		Bootstrap bs = new Bootstrap();
+		ChannelFuture client = bs.group(group)
+				.channel(NioSocketChannel.class)
+				.handler(new ChannelInitializer(){ // 未来连接后收到数据的处理
+					@Override
+					protected void initChannel(Channel ch) throws Exception {
+						ch.pipeline()
+						  .addLast(new HttpClientCodec())
+						  .addLast(new HttpObjectAggregator(1024 * 512))
+						.addLast(new ChannelInboundHandlerAdapter(){
+							@Override
+							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+								//接收，预埋的回调，根据netty堆socket io时间的响应
+								res.complete(null);
+							}
+						});
+					}
+				})
+				.connect("192.168.1.102", 9090);
+		try {
+			client.sync().channel();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// 2。发送和接收可以异步。
+		// 3。接收
+
+		res.complete(null);
 	}
 }
