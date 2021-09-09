@@ -152,7 +152,9 @@ public class ClientFactory {
 				})
 				.connect("192.168.1.102", 9090);
 		try {
-			client.sync().channel();
+			final Channel channel = client.sync().channel();
+			// 构造HttpRequest
+			channel.writeAndFlush(null); // 作为客户端想server发送http request
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
