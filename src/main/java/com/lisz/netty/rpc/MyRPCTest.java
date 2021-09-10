@@ -85,6 +85,11 @@ public class MyRPCTest {
 
 	}
 
+	@Test
+	public void startHttpServer() {
+		/// tomcat jetty
+	}
+
 	//Server端
 	@Test
 	public void startServer() {
@@ -146,7 +151,8 @@ public class MyRPCTest {
 								buf.writeBytes(bytes);
 								DefaultFullHttpResponse response = new DefaultFullHttpResponse(
 										request.protocolVersion(), HttpResponseStatus.OK, buf);
-
+								// nettyTrans()起作用的时候，必须要设置协议响应中的content-length字段
+								response.headers().set(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
 								// http协议，header + content。跟上面的FullHttpRequest request = (FullHttpRequest) msg呼应
 								ctx.writeAndFlush(response);
 

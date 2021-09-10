@@ -11,8 +11,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.*;
 
 import java.io.*;
 import java.net.*;
@@ -93,7 +92,7 @@ public class ClientFactory {
 			// 1。用URL现成的 okhttp、URLConnection等工具，它们包含了http编解码、发送、socket、连接
 			urlTrans(content, res);
 			// 2。自己操心：on Netty（IO框架） + netty已经提供的http协议相关的编解码
-			//nettyTrans(content, res)
+			//nettyTrans(content, res);
 		}
 
 
@@ -144,8 +143,15 @@ public class ClientFactory {
 						.addLast(new ChannelInboundHandlerAdapter(){
 							@Override
 							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-								//接收，预埋的回调，根据netty堆socket io时间的响应
-								res.complete(null);
+								// 接收，预埋的回调，根据netty堆socket io时间的响应
+								// 客户端的响应是啥？完整的http-response
+								FullHttpResponse response = (FullHttpResponse) msg;
+								System.out.println(response);
+								final ByteBuf buf = response.content();
+								byte[] data = new byte[buf.readableBytes()];
+								buf.readBytes(data);
+								final MyContent myContent = SerDerUtil.deserialize(data, MyContent.class);
+								res.complete(myContent.getRes());
 							}
 						});
 					}
@@ -154,13 +160,18 @@ public class ClientFactory {
 		try {
 			final Channel channel = client.sync().channel();
 			// 构造HttpRequest
-			channel.writeAndFlush(null); // 作为客户端想server发送http request
+			final byte[] data = SerDerUtil.serialize(content);
+			final DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_0,
+					HttpMethod.POST, "/", Unpooled.copiedBuffer(data));
+			request.headers().set(HttpHeaderNames.CONTENT_LENGTH, data.length);
+			channel.writeAndFlush(request).sync(); // 作为客户端想server发送http request
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		// 2。发送和接收可以异步。
 		// 3。接收
 
-		res.complete(null);
+		//res.complete(null);
 	}
 }
