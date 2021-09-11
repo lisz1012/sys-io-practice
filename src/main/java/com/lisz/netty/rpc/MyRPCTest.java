@@ -20,6 +20,7 @@ package com.lisz.netty.rpc;
 import com.lisz.netty.rpc.protocol.MyContent;
 import com.lisz.netty.rpc.proxy.MyProxy;
 import com.lisz.netty.rpc.service.*;
+import com.lisz.netty.rpc.servlet.MyHttpRpcHandler;
 import com.lisz.netty.rpc.transport.RequestHandler;
 import com.lisz.netty.rpc.transport.ServerDecoder;
 import com.lisz.netty.rpc.util.SerDerUtil;
@@ -34,8 +35,19 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.Test;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +98,20 @@ public class MyRPCTest {
 	}
 
 	@Test
-	public void startHttpServer() {
-		/// tomcat jetty
+	public void startHttpServer() throws Exception {
+		Car car = new MyCar();
+		Fly fly = new MyFly();
+		Dispatcher dispatcher = Dispatcher.getInstance();
+		dispatcher.register(Car.class.getName(), car);
+		dispatcher.register(Fly.class.getName(), fly);
+
+		/// tomcat jetty   [servlet]
+		Server server = new Server(9090);
+		ServletContextHandler handler = new ServletContextHandler(server, "/");
+		handler.addServlet(MyHttpRpcHandler.class, "/*"); // web.xml
+
+		server.start();
+		server.join();
 	}
 
 	//Server端
@@ -219,4 +243,6 @@ public class MyRPCTest {
 		final Person person = car.getPerson("Zhang san", 12);
 		System.out.println(person);
 	}
+
+
 }

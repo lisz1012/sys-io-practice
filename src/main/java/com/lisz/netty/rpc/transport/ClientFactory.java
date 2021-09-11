@@ -90,15 +90,16 @@ public class ClientFactory {
 		} else {
 			// 使用http协议为载体。
 			// 1。用URL现成的 okhttp、URLConnection等工具，它们包含了http编解码、发送、socket、连接
-			urlTrans(content, res);
+//			urlTrans(content, res);
 			// 2。自己操心：on Netty（IO框架） + netty已经提供的http协议相关的编解码
-			//nettyTrans(content, res);
+			nettyTrans(content, res);
 		}
 
 
 		return res;
 	}
 
+	// Http，每请求对应一个连接
 	private static void urlTrans(MyContent content, CompletableFuture<Object> res) {
 		Object obj = null;
 		try {
@@ -130,6 +131,7 @@ public class ClientFactory {
 		// 刚才一切都顺利，关注未来的问题。。。
 		// 每个请求对应一个连接
 		// 1。通过netty建立IO连接 socket/io
+		// TODO 改成多个http的request服用一个netty client，并且兵法发送请求，实现有状态通信
 		NioEventLoopGroup group = new NioEventLoopGroup(1); //本该定义到外面
 		Bootstrap bs = new Bootstrap();
 		ChannelFuture client = bs.group(group)
