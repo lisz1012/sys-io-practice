@@ -131,7 +131,7 @@ public class ClientFactory {
 		// 刚才一切都顺利，关注未来的问题。。。
 		// 每个请求对应一个连接
 		// 1。通过netty建立IO连接 socket/io
-		// TODO 改成多个http的request服用一个netty client，并且兵法发送请求，实现有状态通信
+		// TODO 改成多个http的request服用一个netty client，并且发送请求，实现有状态通信
 		NioEventLoopGroup group = new NioEventLoopGroup(1); //本该定义到外面
 		Bootstrap bs = new Bootstrap();
 		ChannelFuture client = bs.group(group)
