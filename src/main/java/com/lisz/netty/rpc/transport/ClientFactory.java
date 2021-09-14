@@ -77,7 +77,7 @@ public class ClientFactory {
 			 *          socket2
 			 *    ipB：port
 			 */
-			//3，连接池：：取得连接
+			//3，连接池：取得连接
 			ClientFactory factory = ClientFactory.getInstance();
 			NioSocketChannel clientChannel
 					= factory.getClient(new InetSocketAddress("192.168.1.102", 9090));
