@@ -29,7 +29,7 @@ public class ClientFactory {
 		return INSTANCE;
 	}
 
-	// 一个Consumer可以连接多个Provider，每一个Provider 都有自己的pool，kv
+	// 一个Consumer可以连接多个Provider，对于每一个Provider， client这边都有自己的pool，K，V
 	private Map<InetSocketAddress, ClientPool> outboxes = new ConcurrentHashMap<>();
 
 	public NioSocketChannel getClient(InetSocketAddress address) {

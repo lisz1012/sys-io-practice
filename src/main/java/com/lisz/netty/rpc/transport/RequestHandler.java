@@ -33,7 +33,7 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
 		// 有新的header + content
 		final String ioThreadName = Thread.currentThread().getName();
 		// 1. 直接在当前线程处理IO接收处理和返回
-		// 2。使用Netty的EventLoop来处理
+		// 2。使用Netty的EventLoop来处理, 自己当前线程仅仅execute，那就是先全封装成task，然后自己再去队列里取回，然后再处理业务、返回
 		// 3. 自己创建线程池. 好处是自定义灵活
 		// 4. 当前线程只处理IO，后续业务以ctx.executor().parent().next().execute的方式让所有线程来分担：IO和业务解耦
 		// boss和workers会共享这些线程
