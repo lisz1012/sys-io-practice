@@ -98,12 +98,12 @@ class NioThread extends Thread {
 	public void run() {
 		try {
 			while (true) {
-				while (selector.select(10) > 0) {
-					Set<SelectionKey> selectionKeys = selector.selectedKeys();
+				while (selector.select(10) > 0) { //从内核里搬运结果集到JVM进程的直接内存里面
+					Set<SelectionKey> selectionKeys = selector.selectedKeys(); //从直接内存拷贝fd到其堆空间
 					Iterator<SelectionKey> iterator = selectionKeys.iterator();
 					while (iterator.hasNext()) {
 						SelectionKey key = iterator.next();
-						iterator.remove();
+						iterator.remove();               // remove的是直接内存中的结果集中的fd
 						if (key.isAcceptable()) {
 							handleAccept(key);
 						} else if (key.isReadable()) {
