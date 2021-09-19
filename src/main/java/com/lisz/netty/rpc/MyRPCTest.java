@@ -229,7 +229,7 @@ public class MyRPCTest {
 		// http 的 keepalive可以避免三次握手，一次发送一次返回，再一次发送再一次返回，但是连接不断
 		// C + P 端遵从http协议约束，豹纹的封装，是否断开连接，保证发送 + 返回为一个"原子操作"，在http协议之上带上requestId
 		// 去掉名字，大家走的都是TCP。内功心法就是TCP连接。但是有可能Provider端不可控，那Consumer可能只能实用http协议
-		// http连接可以穿行使用，也有池化的概念
+		// http连接可以串行使用，也有池化的概念
 		try {
 			bind.sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
