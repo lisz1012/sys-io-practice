@@ -103,7 +103,7 @@ class NioThread extends Thread {
 					Iterator<SelectionKey> iterator = selectionKeys.iterator();
 					while (iterator.hasNext()) {
 						SelectionKey key = iterator.next();
-						iterator.remove();               // remove的是直接内存中的结果集中的fd
+						iterator.remove();               // remove的是直接内存中的结果集中的fd，否则下次还会select到
 						if (key.isAcceptable()) {
 							handleAccept(key);
 						} else if (key.isReadable()) {
