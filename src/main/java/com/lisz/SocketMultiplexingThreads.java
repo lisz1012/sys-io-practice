@@ -29,7 +29,7 @@ public class SocketMultiplexingThreads {
 			selector1 = Selector.open();
 			selector2 = Selector.open();
 			selector3 = Selector.open();
-			// selector1的用途生来就不一样, 只有拿着selector1的那个NioThread线程才能接受客户端的连接
+			// selector1的用途生来就不一样, 只有拿着selector1的那个NioThread线程才能接受客户端的连接；但是3个都能处理读请求
 			server.register(selector1, SelectionKey.OP_ACCEPT);
 		} catch (IOException e) {
 			e.printStackTrace();
