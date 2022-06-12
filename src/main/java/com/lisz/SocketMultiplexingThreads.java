@@ -82,7 +82,7 @@ class NioThread extends Thread {
 		selectors = n;
 		queues = new LinkedBlockingQueue[selectors];
 		for (int i = 0; i < n; i++) {
-			queues[i] = new LinkedBlockingQueue<SocketChannel>();
+			queues[i] = new LinkedBlockingQueue<SocketChannel>(); // 队列是在堆里。是共享的，只有方法的逻辑、本地变量是线程隔离的
 		}
 	}
 
