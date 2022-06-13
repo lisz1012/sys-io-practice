@@ -14,7 +14,7 @@ public class VolatileTest {
             int threadValue = COUNTER;
             while ( threadValue < 5){
                 if( threadValue!= COUNTER){
-                    System.out.println("Got Change for COUNTER : " + COUNTER + "");
+                    System.out.println("Got Change for COUNTER : " + COUNTER);
                     threadValue= COUNTER;
                 }
 //                try {
