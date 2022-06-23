@@ -14,9 +14,6 @@ import org.junit.Test;
 import java.net.InetSocketAddress;
 
 public class MyNetty {
-
-
-
 	@Test
 	public void myBytebuf() {
 //		ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(8, 20);
