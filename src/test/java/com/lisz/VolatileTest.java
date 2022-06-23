@@ -18,7 +18,7 @@ public class VolatileTest {
                     threadValue= COUNTER;
                 }
 //                try {
-//                    Thread.sleep(0); // Thread.sleep(0);也会让输出结果在没有volatile的情况下变正确
+//                    Thread.sleep(0); // Thread.sleep(0);也会让输出结果在没有volatile的情况下变正确。
 //                } catch (InterruptedException e) {
 //                    throw new RuntimeException(e);
 //                }
