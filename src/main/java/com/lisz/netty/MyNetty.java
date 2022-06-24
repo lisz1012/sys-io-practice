@@ -47,7 +47,7 @@ public class MyNetty {
 		System.out.println("buf.capacity() = " + buf.capacity());               // 动态分配的，变化的
 		System.out.println("buf.maxCapacity() = " + buf.maxCapacity());         // 设置好的
 		System.out.println("buf.isDirect() = " + buf.isDirect());               // true为堆外内存
-		System.out.println("--------------------------------------------");
+		System.out.println("---------------------------------------------");
 	}
 
 
