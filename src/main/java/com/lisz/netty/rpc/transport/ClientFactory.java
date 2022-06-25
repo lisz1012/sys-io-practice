@@ -71,7 +71,7 @@ public class ClientFactory {
 			 * 2。第一层负载，面向Provider
 			 * 3。Consumer是线程池，面向Service，开启若干条连接的意义是适应不同的远程方法调用
 			 *    并发就有木桶效应，倾斜。一个Service可能有多个物理主机，一个物理主机可与开启
-			 *    多个连接
+			 *    多个连接.
 			 *    ipA：port
 			 *          socket1
 			 *          socket2
