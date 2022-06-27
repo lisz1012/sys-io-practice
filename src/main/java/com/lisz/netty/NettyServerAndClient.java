@@ -27,6 +27,7 @@ public class NettyServerAndClient {
 
 	@Test
 	public void nettyServer() throws Exception {
+		// IO 线程
 		NioEventLoopGroup group = new NioEventLoopGroup(1);
 		ServerBootstrap serverBootstrap = new ServerBootstrap();
 		ChannelFuture bind = serverBootstrap.group(group, group)
