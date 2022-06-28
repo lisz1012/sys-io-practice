@@ -27,7 +27,7 @@ public class NettyServerAndClient {
 
 	@Test
 	public void nettyServer() throws Exception {
-		// IO 线程
+		// IO 线程, 这里没有设置boss NioEventloopGroup
 		NioEventLoopGroup group = new NioEventLoopGroup(1);
 		ServerBootstrap serverBootstrap = new ServerBootstrap();
 		ChannelFuture bind = serverBootstrap.group(group, group)
