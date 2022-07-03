@@ -21,7 +21,7 @@ import java.net.InetSocketAddress;
  *    `nc 192.168.1.102 9090`
  * Netty Client: start nc with:
  *    `nc -l 192.168.1.99 9090`
- *  and connect to 192.168.1.99 with the program,and send message from server
+ *  and connect to 192.168.1.99 with the program,and send message from server。
  */
 public class NettyServerAndClient {
 
