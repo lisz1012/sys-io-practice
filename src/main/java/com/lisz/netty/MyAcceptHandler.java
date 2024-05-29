@@ -30,6 +30,6 @@ public class MyAcceptHandler extends ChannelInboundHandlerAdapter {
 		// 响应式的
 		client.pipeline().addLast(handler); // client::pipeline[ChannelInit, ]
 		// 注册
-		selector.register(client);
+		selector.register(client);  // 由于 handler 是个 ChannelInit，所以这里面会调用它的 channelRegistered 方法, 其中又会把 MyInHandler 加到 pipeline 里,并把自己移除
 	}
 }

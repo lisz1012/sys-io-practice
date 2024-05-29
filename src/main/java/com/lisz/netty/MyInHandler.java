@@ -25,7 +25,7 @@ public class MyInHandler extends ChannelInboundHandlerAdapter {
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		ByteBuf buf = (ByteBuf) msg;
 		//CharSequence str = buf.readCharSequence(buf.readableBytes(), CharsetUtil.UTF_8);
-		// get不碰index指针，我们要指定起始位置
+		// get不碰index指针，我们要指定起始位置: 0
 		CharSequence str = buf.getCharSequence(0, buf.readableBytes(), CharsetUtil.UTF_8);
 		System.out.println("Received: " + str);
 		ChannelFuture send = ctx.writeAndFlush(buf);

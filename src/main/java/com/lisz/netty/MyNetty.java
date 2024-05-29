@@ -128,6 +128,7 @@ public class MyNetty {
 	// Server： nc -l 192.168.1.99 9090
 	@Test
 	public void nettyClient() throws Exception {
+		// Netty多路复用器
 		NioEventLoopGroup group = new NioEventLoopGroup(1);
 		Bootstrap bootstrap = new Bootstrap();
 		ChannelFuture connect = bootstrap.group(group)
@@ -151,6 +152,7 @@ public class MyNetty {
 
 	@Test
 	public void serverMode() throws Exception {
+		// Netty多路复用器
 		NioEventLoopGroup thread = new NioEventLoopGroup(1);
 		NioServerSocketChannel server = new NioServerSocketChannel();
 		thread.register(server);
@@ -178,6 +180,7 @@ public class MyNetty {
 	// 自己摸索推导出来的，太高兴啦！
 	@Test
 	public void nettyServer() throws Exception {
+		// Netty多路复用器
 		NioEventLoopGroup thread = new NioEventLoopGroup(1);
 		ServerBootstrap serverBootstrap = new ServerBootstrap();
 		ChannelFuture connect = serverBootstrap
