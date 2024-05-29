@@ -60,7 +60,7 @@ public class MyNetty {
 	 */
 	@Test
 	public void loopExecutor() throws Exception {
-		// 先把group理解成一个线程池
+		// 先把group理解成一个线程池, 下面设置的是 2 个线程, 所以最多能 execute 两个任务
 		NioEventLoopGroup selector = new NioEventLoopGroup(2);
 		selector.execute(() -> {
 			while (true) {
