@@ -133,7 +133,7 @@ public class MyNetty {
 		Bootstrap bootstrap = new Bootstrap();
 		ChannelFuture connect = bootstrap.group(group)
 				.channel(NioSocketChannel.class)
-				.handler(new ChannelInitializer<SocketChannel>() { // Channel（默认）也可以
+				.handler(new ChannelInitializer<SocketChannel>() { // Channel（默认）也可以. ChannelInitializer是个模板方法, 过桥包装和业务无关的, 业务相关的由外界用户传进来
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ch.pipeline().addLast(new MyInHandler());
@@ -158,7 +158,7 @@ public class MyNetty {
 		thread.register(server);
 		// 指不定什么时候家里来人, 响应式，预埋，之后的某个时间执行。
 		// 注册事件，观察者模式。提前写逻辑，被用到的时候才执行。
-		// accept接收并且注册到selector
+		// accept接收并且注册到selector.
 		server.pipeline().addLast(new MyAcceptHandler(thread, new ChannelInit(){
 			@Override
 			protected void initChannel(ChannelHandlerContext ctx) {
